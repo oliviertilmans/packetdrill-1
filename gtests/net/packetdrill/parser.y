@@ -483,7 +483,7 @@ static struct packet *append_gre(struct packet *packet, struct expression *expr)
 %}
 
 %locations
-%expect 3  /* we expect shift/reduce conflicts */
+%expect 4  /* we expect shift/reduce conflicts */
 /* The %union section specifies the set of possible types for values
  * for all nonterminal and terminal symbols in the grammar.
  */
@@ -1104,6 +1104,8 @@ ip_ecn
 
 flags
 : WORD         { $$ = $1; }
+| INTEGER      { $$ = strdup(yytext); }
+| INTEGER '.'  { asprintf(&($$), "%lld.", $1); }
 | '.'          { $$ = strdup("."); }
 | WORD '.'     { asprintf(&($$), "%s.", $1); free($1); }
 | '-'          { $$ = strdup(""); }  /* no TCP flags set in segment */

@@ -404,10 +404,12 @@ static int find_tcp_timestamp(struct packet *packet, char **error)
 	for (option = tcp_options_begin(packet, &iter); option != NULL;
 	     option = tcp_options_next(&iter, error))
 		if (option->kind == TCPOPT_TIMESTAMP) {
-			packet->tcp_ts_val =
-				(void *)&(option->data.time_stamp.val);
-			packet->tcp_ts_ecr =
-				(void *)&(option->data.time_stamp.ecr);
+			memcpy(&packet->tcp_ts_val,
+			       &option->data.time_stamp.val,
+			       sizeof(packet->tcp_ts_val));
+			memcpy(&packet->tcp_ts_ecr,
+			       &option->data.time_stamp.ecr,
+			       sizeof(packet->tcp_ts_ecr));
 		}
 	return *error ? STATUS_ERR : STATUS_OK;
 }
@@ -893,6 +895,9 @@ static int verify_tcp(
 	    (strict && check_field("tcp_cwr",
 			script_tcp->cwr,
 			actual_tcp->cwr, error)) ||
+	    (strict && check_field("tcp_ns",
+			script_tcp->ns,
+			actual_tcp->ns, error)) ||
 	    check_field("tcp_reserved_bits",
 			script_tcp->res1,
 			actual_tcp->res1, error) ||
